@@ -42,8 +42,10 @@ class HybridNets():
 
 		self.img_height, self.img_width = image.shape[:2]
 
+		input_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
 		# Resize input image
-		input_img = cv2.resize(image, (self.input_width,self.input_height))  
+		input_img = cv2.resize(input_img, (self.input_width,self.input_height))  
 
 		# Scale input pixel values to -1 to 1
 		mean=[0.485, 0.456, 0.406]
