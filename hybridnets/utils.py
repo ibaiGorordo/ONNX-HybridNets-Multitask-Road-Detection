@@ -29,7 +29,7 @@ def util_draw_detections(boxes, scores, image):
 
 	for box, score in zip(boxes, scores):
 
-		cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), detection_color, 1)
+		cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), detection_color, 2)
 
 	return image
 
@@ -86,7 +86,6 @@ def nms_fast(bboxes, scores, iou_threshold=0.5):
 
         iou = iou_np(bboxes[max_scr_ind], bboxes[ind_list], \
                      areas[max_scr_ind], areas[ind_list])
-        print(max_scr_ind, ind_list, bboxes[max_scr_ind],bboxes[ind_list], iou)
         
         del_index = np.where(iou >= iou_threshold)
         sort_index = np.delete(sort_index, del_index)
