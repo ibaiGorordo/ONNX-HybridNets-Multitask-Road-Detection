@@ -8,14 +8,10 @@ segmentation_colors = np.array([[0,    0,    0],
 detection_color = (191,  255,  0)
 label = "car"
 
-HORIZON_POINTS = np.float32([[571, 337], [652, 337]])
+ORIGINAL_HORIZON_POINTS = np.float32([[571, 337], [652, 337]])
 
-IMAGE_W, IMAGE_H = (1280, 720)
-BIRD_VIEW_W, BIRD_VIEW_H = (IMAGE_H, IMAGE_H)
-OFFSET = BIRD_VIEW_W/2.5
-bird_eye_view_points = np.float32([[OFFSET, BIRD_VIEW_H], [BIRD_VIEW_W - OFFSET, BIRD_VIEW_H], 
-									[OFFSET, 0], [BIRD_VIEW_W - OFFSET, 0]])
-
+num_horizon_points = 0
+new_horizon_points = []
 def util_draw_seg(seg_map, image, alpha = 0.5):
 
 	# Convert segmentation prediction to colors
@@ -51,13 +47,18 @@ def util_draw_detections(boxes, scores, image, text=True):
 
 	return image
 
-def util_draw_bird_eye_view(seg_map, hoizon_points=HORIZON_POINTS):
+def util_draw_bird_eye_view(seg_map, hoizon_points=ORIGINAL_HORIZON_POINTS):
 
-	image_points = np.vstack((np.float32([[0, IMAGE_H], [IMAGE_W, IMAGE_H]]), hoizon_points))
+	img_h, img_w = seg_map.shape[:2]
+	bird_eye_view_w, bird_eye_view_h = (img_h, img_h)
+	offset = bird_eye_view_w/2.5
+	bird_eye_view_points = np.float32([[offset, bird_eye_view_h], [bird_eye_view_w - offset, bird_eye_view_h], 
+										[offset, 0], [bird_eye_view_w - offset, 0]])
+
+	image_points = np.vstack((np.float32([[0, img_h], [img_w, img_h]]), hoizon_points))
 	M = cv2.getPerspectiveTransform(image_points, bird_eye_view_points)
-	bird_eye_seg_map = cv2.warpPerspective(seg_map, M, (BIRD_VIEW_W, BIRD_VIEW_H))
+	bird_eye_seg_map = cv2.warpPerspective(seg_map, M, (bird_eye_view_w, bird_eye_view_h))
 	return bird_eye_seg_map
-
 
 # Ref: https://github.com/datvuthanh/HybridNets/blob/d43b0aa8de2a1d3280084270d29cf4c7abf640ae/utils/utils.py#L615
 def transform_boxes(boxes, anchors):
@@ -121,3 +122,62 @@ def nms_fast(bboxes, scores, iou_threshold=0.5):
 	scores = scores[sort_index]
 	
 	return bboxes, scores
+
+def get_horizon_points(image):
+
+	cv2.namedWindow("Get horizon points", cv2.WINDOW_NORMAL)
+	cv2.setMouseCallback("Get horizon points", get_horizon_point)
+
+	# Draw horizontal line
+	image = cv2.line(image, (0,image.shape[0]//2), 
+							(image.shape[1],image.shape[0]//2), 
+							(0,  0,   251), 1)
+
+	cv2.imshow("Get horizon points", image)
+
+	num_lines = 0
+	while True:
+
+		if (num_lines == 0) and (num_horizon_points == 1):
+
+			image = cv2.line(image, (0,image.shape[0]), 
+							(new_horizon_points[0][0], new_horizon_points[0][1]), 
+							(192,  67,   251), 3)
+
+			image = cv2.circle(image, (new_horizon_points[0][0], new_horizon_points[0][1]), 
+							5, (251,  191,   67), -1)
+			
+			cv2.imshow("Get horizon points", image)
+			num_lines += 1
+
+		elif(num_lines == 1) and (num_horizon_points == 2):
+
+			image = cv2.line(image, (image.shape[1],image.shape[0]), 
+				(new_horizon_points[1][0], new_horizon_points[1][1]), 
+				(192,  67,   251), 3)
+
+			image = cv2.circle(image, (new_horizon_points[1][0], new_horizon_points[1][1]), 
+								5, (251,  191,   67), -1)
+			
+			cv2.imshow("Get horizon points", image)
+			num_lines += 1
+			break
+
+		cv2.waitKey(100)
+
+	cv2.waitKey(1000)
+	cv2.destroyWindow("Get horizon points")
+
+	horizon_points = np.float32(new_horizon_points)
+	print(f"horizon_points = np.{repr(horizon_points)}")
+
+	return horizon_points
+
+def get_horizon_point(event,x,y,flags,param):
+
+	global num_horizon_points, new_horizon_points 
+
+	if event == cv2.EVENT_LBUTTONDBLCLK:
+
+		new_horizon_points.append([x,y])
+		num_horizon_points += 1

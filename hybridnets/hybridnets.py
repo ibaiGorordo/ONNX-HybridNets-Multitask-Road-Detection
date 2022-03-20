@@ -106,17 +106,17 @@ class HybridNets():
 		front_view = self.draw_segmentation(image, alpha)
 		return self.draw_boxes(front_view, text)
 
-	def draw_bird_eye(self, image):
+	def draw_bird_eye(self, image, horizon_points):
 
 		seg_map = self.draw_2D(image, 0.00001, text=False)
-		return util_draw_bird_eye_view(seg_map)
+		return util_draw_bird_eye_view(seg_map, horizon_points)
 
-	def draw_all(self, image, alpha = 0.5):
+	def draw_all(self, image, horizon_points, alpha = 0.5):
 
 		front_view = self.draw_segmentation(image, alpha)
 		front_view = self.draw_boxes(front_view)
 
-		bird_eye_view = self.draw_bird_eye(image)
+		bird_eye_view = self.draw_bird_eye(image, horizon_points)
 
 		combined_img = np.hstack((front_view, bird_eye_view))
 
