@@ -28,19 +28,19 @@ The Pytorch pretrained model was taken from the [original repository](https://gi
  python image_road_detection.py
  ```
  
+ * **Video Bird Eye View**: https://youtu.be/SbJ7C5d6X1w
+ ![!HybridNets Bird eye view Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/bird_eye_view.gif)
+ 
+ ```
+ python video_bird_eye_view_road_detection.py
+ ```
+ 
  * **Video inference**: https://youtu.be/GGa8MayeKtQ
  https://youtu.be/SbJ7C5d6X1w
  ![!HybridNets video Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/video_example.gif)
  
  ```
  python video_road_detection.py
- ```
-
- * **Video Bird Eye View**: https://youtu.be/SbJ7C5d6X1w
- ![!HybridNets Bird eye view Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/bird_eye_view.gif)
- 
- ```
- python video_bird_eye_view_road_detection.py
  ```
  
 # Bird Eye View for Custom Video:
