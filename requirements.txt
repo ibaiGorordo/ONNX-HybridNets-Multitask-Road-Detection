@@ -1,0 +1,5 @@
+opencv-python
+onnx
+onnxruntime
+onnxruntime-gpu
+imread-from-url
