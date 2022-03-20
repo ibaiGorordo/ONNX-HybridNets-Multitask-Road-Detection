@@ -19,7 +19,7 @@ anchor_path = "models/hybridnets_384x512/anchors_384x512.npy"
 optimized_model(model_path) # Remove unused nodes
 roadEstimator = HybridNets(model_path, anchor_path, conf_thres=0.5, iou_thres=0.5)
 
-# out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (1280+720,720))
+out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (1280,720))
 
 cv2.namedWindow("Road Detections", cv2.WINDOW_NORMAL)	
 while cap.isOpened():
@@ -42,6 +42,6 @@ while cap.isOpened():
 	combined_img = roadEstimator.draw_2D(new_frame)
 
 	cv2.imshow("Road Detections", combined_img)
-	# out.write(combined_img)
+	out.write(combined_img)
 
-# out.release()
+out.release()
