@@ -25,18 +25,32 @@ The Pytorch pretrained model was taken from the [original repository](https://gi
  ![!HybridNets Image Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/image_example.jpg)
  
  ```
- image_road_detection.py
+ python image_road_detection.py
+ ```
+ 
+ * **Video inference**: https://youtu.be/GGa8MayeKtQ
+ https://youtu.be/SbJ7C5d6X1w
+ ![!HybridNets video Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/video_example.gif)
+ 
+ ```
+ python video_road_detection.py
  ```
 
- * **Video Bird Eye Viee**:
+ * **Video Bird Eye View**: https://youtu.be/SbJ7C5d6X1w
  ![!HybridNets Bird eye view Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/bird_eye_view.gif)
  
  ```
- video_bird_eye_view_road_detection.py
+ python video_bird_eye_view_road_detection.py
  ```
  
 # Bird Eye View for Custom Video:
 If you use a different video for teh bird eye view, you will have to modify the horizon points. Set `horizon_points=None` to trigger the horizon point selection mode. This mode will show the image and wait until the two horizon points are selected as in the image below. A horizontal line is used as a guide, if the road does not reach that height, you can ignore the horizontal line. Copy the printed output into the `horizon_points` variable for next inferences.
 
 ![!Horizon point selection](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/horizon_points.png)
+ 
+# References:
+* HyrbidNets model: https://github.com/datvuthanh/HybridNets
+* PINTO0309's model zoo: https://github.com/PINTO0309/PINTO_model_zoo
+* PINTO0309's model conversion tool: https://github.com/PINTO0309/openvino2tensorflow
+* Original paper: https://arxiv.org/abs/2203.09035
  
