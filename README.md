@@ -22,10 +22,21 @@ The Pytorch pretrained model was taken from the [original repository](https://gi
 # Examples
 
  * **Image inference**:
- ![!HybridNets Image Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/output.jpg)
+ ![!HybridNets Image Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/image_example.jpg)
  
  ```
  image_road_detection.py
  ```
 
+ * **Video Bird Eye Viee**:
+ ![!HybridNets Bird eye view Road multitask detections](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/bird_eye_view.gif)
+ 
+ ```
+ video_bird_eye_view_road_detection.py
+ ```
+ 
+# Bird Eye View for Custom Video:
+If you use a different video for teh bird eye view, you will have to modify the horizon points. Set `horizon_points=None` to trigger the horizon point selection mode. This mode will show the image and wait until the two horizon points are selected as in the image below. A horizontal line is used as a guide, if the road does not reach that height, you can ignore the horizontal line. Copy the printed output into the `horizon_points` variable for next inferences.
+
+![!Horizon point selection](https://github.com/ibaiGorordo/ONNX-HybridNets-Multitask-Road-Detection/blob/main/doc/img/horizon_points.png)
  
