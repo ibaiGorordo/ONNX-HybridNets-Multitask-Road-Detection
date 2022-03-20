@@ -15,7 +15,7 @@ img = imread_from_url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b
 # Update road detector
 seg_map, filtered_boxes, filtered_scores = roadEstimator(img)
 
-combined_img = roadEstimator.draw_all(img)
+combined_img = roadEstimator.draw_2D(img)
 cv2.namedWindow("Road Detections", cv2.WINDOW_NORMAL)
 cv2.imshow("Road Detections", combined_img)
 

@@ -3,10 +3,18 @@ import cv2
 
 segmentation_colors = np.array([[0,    0,    0],
 								[255,  191,  0],
-							 	[192,  67,   251]], dtype=np.uint8)
+								[192,  67,   251]], dtype=np.uint8)
 
 detection_color = (191,  255,  0)
+label = "car"
 
+HORIZON_POINTS = np.float32([[571, 337], [652, 337]])
+
+IMAGE_W, IMAGE_H = (1280, 720)
+BIRD_VIEW_W, BIRD_VIEW_H = (IMAGE_H, IMAGE_H)
+OFFSET = BIRD_VIEW_W/2.5
+bird_eye_view_points = np.float32([[OFFSET, BIRD_VIEW_H], [BIRD_VIEW_W - OFFSET, BIRD_VIEW_H], 
+									[OFFSET, 0], [BIRD_VIEW_W - OFFSET, 0]])
 
 def util_draw_seg(seg_map, image, alpha = 0.5):
 
@@ -25,73 +33,91 @@ def util_draw_seg(seg_map, image, alpha = 0.5):
 
 	return combined_img
 
-def util_draw_detections(boxes, scores, image):
+# Ref: https://github.com/datvuthanh/HybridNets/blob/d43b0aa8de2a1d3280084270d29cf4c7abf640ae/utils/plot.py#L52
+def util_draw_detections(boxes, scores, image, text=True):
 
+	tl = int(round(0.0015 * max(image.shape[0:2])))  # line thickness
+	tf = max(tl, 1)  # font thickness
 	for box, score in zip(boxes, scores):
-
-		cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), detection_color, 2)
+		c1, c2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
+		cv2.rectangle(image, c1, c2, detection_color, thickness=tl)
+		if text:
+			s_size = cv2.getTextSize(str('{:.0%}'.format(score)), 0, fontScale=float(tl) / 3, thickness=tf)[0]
+			t_size = cv2.getTextSize(label, 0, fontScale=float(tl) / 3, thickness=tf)[0]
+			c2 = c1[0] + t_size[0] + s_size[0] + 15, c1[1] - t_size[1] - 3
+			cv2.rectangle(image, c1, c2, detection_color, -1)  # filled
+			cv2.putText(image, '{}: {:.0%}'.format(label, score), (c1[0], c1[1] - 2), 0, float(tl) / 3, [0, 0, 0],
+						thickness=tf, lineType=cv2.FONT_HERSHEY_SIMPLEX)
 
 	return image
+
+def util_draw_bird_eye_view(seg_map, hoizon_points=HORIZON_POINTS):
+
+	image_points = np.vstack((np.float32([[0, IMAGE_H], [IMAGE_W, IMAGE_H]]), hoizon_points))
+	M = cv2.getPerspectiveTransform(image_points, bird_eye_view_points)
+	bird_eye_seg_map = cv2.warpPerspective(seg_map, M, (BIRD_VIEW_W, BIRD_VIEW_H))
+	return bird_eye_seg_map
+
 
 # Ref: https://github.com/datvuthanh/HybridNets/blob/d43b0aa8de2a1d3280084270d29cf4c7abf640ae/utils/utils.py#L615
 def transform_boxes(boxes, anchors):
 
-    y_centers_a = (anchors[:, 0] + anchors[:, 2]) / 2
-    x_centers_a = (anchors[:, 1] + anchors[:, 3]) / 2
-    ha = anchors[:, 2] - anchors[:, 0]
-    wa = anchors[:, 3] - anchors[:, 1]
+	y_centers_a = (anchors[:, 0] + anchors[:, 2]) / 2
+	x_centers_a = (anchors[:, 1] + anchors[:, 3]) / 2
+	ha = anchors[:, 2] - anchors[:, 0]
+	wa = anchors[:, 3] - anchors[:, 1]
 
-    w = np.exp(boxes[:, 3]) * wa
-    h = np.exp(boxes[:, 2]) * ha
+	w = np.exp(boxes[:, 3]) * wa
+	h = np.exp(boxes[:, 2]) * ha
 
-    y_centers = boxes[:, 0] * ha + y_centers_a
-    x_centers = boxes[:, 1] * wa + x_centers_a
+	y_centers = boxes[:, 0] * ha + y_centers_a
+	x_centers = boxes[:, 1] * wa + x_centers_a
 
-    ymin = y_centers - h / 2.
-    xmin = x_centers - w / 2.
-    ymax = y_centers + h / 2.
-    xmax = x_centers + w / 2.
+	ymin = y_centers - h / 2.
+	xmin = x_centers - w / 2.
+	ymax = y_centers + h / 2.
+	xmax = x_centers + w / 2.
 
-    return np.vstack((xmin, ymin, xmax, ymax)).T
+	return np.vstack((xmin, ymin, xmax, ymax)).T
 
 
 # Ref: https://python-ai-learn.com/2021/02/14/nmsfast/
 def iou_np(box, boxes, area, areas):
 
-    x_min = np.maximum(box[0], boxes[:,0])
-    y_min = np.maximum(box[1], boxes[:,1])
-    x_max = np.minimum(box[2], boxes[:,2])
-    y_max = np.minimum(box[3], boxes[:,3])
+	x_min = np.maximum(box[0], boxes[:,0])
+	y_min = np.maximum(box[1], boxes[:,1])
+	x_max = np.minimum(box[2], boxes[:,2])
+	y_max = np.minimum(box[3], boxes[:,3])
 
-    w = np.maximum(0, x_max - x_min + 1)
-    h = np.maximum(0, y_max - y_min + 1)
-    intersect = w*h
-    
-    iou_np = intersect / (area + areas - intersect)
-    return iou_np
+	w = np.maximum(0, x_max - x_min + 1)
+	h = np.maximum(0, y_max - y_min + 1)
+	intersect = w*h
+	
+	iou_np = intersect / (area + areas - intersect)
+	return iou_np
 
 # Ref: https://python-ai-learn.com/2021/02/14/nmsfast/
 def nms_fast(bboxes, scores, iou_threshold=0.5):
-     
-    areas = (bboxes[:,2] - bboxes[:,0] + 1) \
-             * (bboxes[:,3] - bboxes[:,1] + 1)
-    
-    sort_index = np.argsort(scores)
-    
-    i = -1
-    while(len(sort_index) >= 1 - i):
+	 
+	areas = (bboxes[:,2] - bboxes[:,0] + 1) \
+			 * (bboxes[:,3] - bboxes[:,1] + 1)
+	
+	sort_index = np.argsort(scores)
+	
+	i = -1
+	while(len(sort_index) >= 1 - i):
 
-        max_scr_ind = sort_index[i]
-        ind_list = sort_index[:i]
+		max_scr_ind = sort_index[i]
+		ind_list = sort_index[:i]
 
-        iou = iou_np(bboxes[max_scr_ind], bboxes[ind_list], \
-                     areas[max_scr_ind], areas[ind_list])
-        
-        del_index = np.where(iou >= iou_threshold)
-        sort_index = np.delete(sort_index, del_index)
-        i -= 1
-    
-    bboxes = bboxes[sort_index]
-    scores = scores[sort_index]
-    
-    return bboxes, scores
+		iou = iou_np(bboxes[max_scr_ind], bboxes[ind_list], \
+					 areas[max_scr_ind], areas[ind_list])
+		
+		del_index = np.where(iou >= iou_threshold)
+		sort_index = np.delete(sort_index, del_index)
+		i -= 1
+	
+	bboxes = bboxes[sort_index]
+	scores = scores[sort_index]
+	
+	return bboxes, scores
