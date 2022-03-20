@@ -79,13 +79,14 @@ def nms_fast(bboxes, scores, iou_threshold=0.5):
     sort_index = np.argsort(scores)
     
     i = -1
-    while(len(sort_index) >= 2 - i):
+    while(len(sort_index) >= 1 - i):
 
         max_scr_ind = sort_index[i]
         ind_list = sort_index[:i]
 
         iou = iou_np(bboxes[max_scr_ind], bboxes[ind_list], \
                      areas[max_scr_ind], areas[ind_list])
+        print(max_scr_ind, ind_list, bboxes[max_scr_ind],bboxes[ind_list], iou)
         
         del_index = np.where(iou >= iou_threshold)
         sort_index = np.delete(sort_index, del_index)
