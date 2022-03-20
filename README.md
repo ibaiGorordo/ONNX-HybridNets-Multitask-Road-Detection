@@ -52,5 +52,6 @@ If you use a different video for teh bird eye view, you will have to modify the 
 * HyrbidNets model: https://github.com/datvuthanh/HybridNets
 * PINTO0309's model zoo: https://github.com/PINTO0309/PINTO_model_zoo
 * PINTO0309's model conversion tool: https://github.com/PINTO0309/openvino2tensorflow
+* Non maximum suppression: https://python-ai-learn.com/2021/02/14/nmsfast/
 * Original paper: https://arxiv.org/abs/2203.09035
  
