@@ -10,7 +10,8 @@
 # Installation
 ```
 pip install -r requirements.txt
-pip install pafy youtube_dl>=2021.12.17
+pip install youtube_dl
+pip install git+https://github.com/zizo-pro/pafy@b8976f22c19e4ab5515cacbfae0a3970370c102b
 ```
 
 # ONNX model
